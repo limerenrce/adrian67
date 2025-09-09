@@ -60,10 +60,27 @@ class BlogController extends Controller
 
     public function showBySlug($slug)
     {
-        $post = Blog::with('author')->where('slug', $slug)->firstOrFail();
+        $post = Blog::with(['author', 'tags'])
+            ->where('slug', $slug)
+            ->firstOrFail();
 
-        return response()->json($post);
+        $data = [
+            'id' => $post->id,
+            'title' => $post->title,
+            'slug' => $post->slug,
+            'content' => $post->content,
+            'author' => [
+                'id' => $post->author->id,
+                'name' => $post->author->name,
+            ],
+            'tags' => $post->tags->pluck('name')->toArray(),
+            'created_at' => $post->created_at,
+            'updated_at' => $post->updated_at,
+        ];
+
+        return response()->json($data);
     }
+
 
 
     public function store(Request $request)
